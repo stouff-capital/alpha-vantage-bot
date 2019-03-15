@@ -11,6 +11,9 @@ import * as readline from 'readline';
 import rimraf from 'rimraf';
 import * as prompt from 'prompt';
 
+require('dotenv').config( {path: '../.env'} );
+const moment = require('moment');
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -31,7 +34,8 @@ let key; // To be loaded from key.txt
 
 let today = new Date();
 let weekDay = today.getDay();
-let formattedDate = [today.getFullYear(), today.getMonth() + 1, today.getDate(), checkDayOfWeek()].join('-');
+//let formattedDate = [today.getFullYear(), today.getMonth() + 1, today.getDate(), checkDayOfWeek()].join('-');
+let formattedDate = moment().format('YYYY-MM-DD');
 
 let currStock = 0; //current stock index
 let interval; //setInterval() reference
@@ -98,20 +102,26 @@ function createAPIKeyFile() {
     
 }
 function readAPIKey() {
-    fs.readFile('./key.txt', 'utf8', (err, data) => {
-        console.log('Loading key.txt');
-        if (err) {
-            createAPIKeyFile();
-        }
-        else {
-            key = data;
-            readStocks();
-        }
-    })
+    if (process.env.API_KEY) {
+        key = process.env.API_KEY;
+        readStocks();
+    } else {
+        fs.readFile('./key.txt', 'utf8', (err, data) => {
+            console.log('Loading key.txt');
+            if (err) {
+                createAPIKeyFile();
+            }
+            else {
+                key = data;
+                readStocks();
+            }
+        })
+    }
+    
 }
 
 function readStocks() {
-    fs.readFile('./src/Ticker_List.txt', 'utf8', (err, data) => {
+    fs.readFile('./src/data/Ticker_List.txt', 'utf8', (err, data) => {
         console.log('Reading stock ticker list');
         if (err)
             throw err;
@@ -221,6 +231,7 @@ function incrementCollection() {
     if (currStock >= stocks.length) {
         clearInterval(interval);
         console.log('Data collection complete');
+        exit(0);
     }
 }
 

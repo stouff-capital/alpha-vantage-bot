@@ -63,6 +63,5 @@ typings/
 # key.txt
 key.txt
 
-
 src/data/*
 !src/data/Ticker_List.txt
